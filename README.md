@@ -18,6 +18,7 @@ Many students fall behind academically before anyone notices. This project uses 
 
 ## Dataset
 Expected file: `lms_records.csv`
+**Note:** The results in this repository were generated using synthetic data that simulates LMS records (attendance, assignments, logins, GPA), since real institutional LMS data was not available. The pipeline works unchanged with a real `lms_records.csv` having the columns above.
 
 | Column | Description |
 |---|---|
