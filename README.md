@@ -1,5 +1,7 @@
 # Student Academic Performance Prediction: KNN vs Naive Bayes
 
+> Early-warning system that predicts Low / Medium / High academic performance using KNN and Naive Bayes.
+
 ## Aim
 To build and compare K-Nearest Neighbours (KNN) and Naive Bayes classifiers that predict semester GPA performance bands (Low / Medium / High) from attendance and assignment patterns, and to deliver the results as an early-warning dashboard for mentors.
 
@@ -31,9 +33,18 @@ If `lms_records.csv` is not found, the script generates synthetic demo data auto
 ## Tech Stack
 Python, pandas, NumPy, scikit-learn, Matplotlib
 
+## Project Structure
+```
+├── student_performance_knn_nb.py   # main script
+├── lms_records.csv                 # dataset (optional)
+├── mentor_alerts.csv               # at-risk student list
+├── mentor_dashboard.png            # result charts
+└── README.md
+```
+
 ## Installation
 ```bash
-git clone https://github.com/<your-username>/student-performance-knn-naive-bayes.git
+git clone https://github.com/Fathima1616/student-performance-knn-naive-bayes.git
 cd student-performance-knn-naive-bayes
 pip install pandas numpy scikit-learn matplotlib
 ```
@@ -59,8 +70,29 @@ python student_performance_knn_nb.py
 ## Results
 | Model | CV Accuracy | Test Accuracy |
 |---|---|---|
-| KNN | add your value | add your value |
-| Naive Bayes | add your value | add your value |
+| KNN (k=7) | 0.778 | 0.770 |
+| Naive Bayes | 0.790 | 0.830 |
+
+**Best model:** Naive Bayes (83% test accuracy)
+**Best k for KNN:** 17 (from cross-validation tuning)
+**At-risk students flagged:** 28 out of 100 test students
+
+## Observations
+- Naive Bayes beat KNN on both CV accuracy (0.790 vs 0.778) and test accuracy (0.830 vs 0.770).
+- **High** and **Low** bands are predicted well (F1 about 0.83 to 0.89). The **Medium** band is hardest (F1 0.66 to 0.74) because it overlaps with both neighbouring groups.
+- Naive Bayes recalled High students almost perfectly (0.97).
+
+## Dashboard
+![Mentor Dashboard](mentor_dashboard.png)
 
 ## Future Work
-- Live dashboard using
+- Live dashboard using Streamlit
+- Try more models (Random Forest, SVM)
+- Tune hyperparameters with GridSearchCV
+- Integrate directly with the institutional LMS
+- Validate with real LMS data from the institution
+
+## Author
+**Shaik Fathima Bee** (23ME1A5460)
+Guide: Mr. R. Sri Ramu
+Course: Machine Learning & Predictive Analytics
