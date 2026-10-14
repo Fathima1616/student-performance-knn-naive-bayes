@@ -93,6 +93,11 @@ python student_performance_knn_nb.py
 - Integrate directly with the institutional LMS
 - Validate with real LMS data from the institution
 
+## Limitations
+- Results are based on synthetic data, so they do not prove performance on real students.
+- Final KNN was trained with k=7; cross-validation tuning suggested k=17.
+- Outlier limits were computed before the train/test split; fitting them on training data only would be stricter.
+
 ## Author
 **Shaik Fathima Bee** (23ME1A5460)
 Guide: Mr. R. Sri Ramu
