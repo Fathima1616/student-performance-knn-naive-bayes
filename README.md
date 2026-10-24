@@ -3,33 +3,33 @@
 > Early-warning system that predicts Low / Medium / High academic performance using KNN and Naive Bayes.
 
 ## Aim
-To build and compare K-Nearest Neighbours (KNN) and Naive Bayes classifiers that predict semester GPA performance bands (Low / Medium / High) from attendance and assignment patterns, and to deliver the results as an early-warning dashboard for mentors.
+To build and compare K-Nearest Neighbours (KNN) and Naive Bayes classifiers that predict student performance bands (Low / Medium / High) from absences, study time, failures and earlier grades, and to deliver the results as an early-warning report and charts for mentors.
 
 ## Problem Statement
-Many students fall behind academically before anyone notices. This project uses institutional LMS records to identify at-risk students early, so mentors can step in on time.
+Many students fall behind academically before anyone notices. This project builds a model to identify at-risk students early, so mentors can step in on time.
 
 ## Features
-- Data cleaning: duplicate removal, missing value handling, outlier capping
-- GPA binned into **Low / Medium / High** performance bands
+- Data cleaning: duplicate removal, missing value handling, outlier capping (fitted on training data only)
+- Final grade (G3) binned into **Low / Medium / High** performance bands
 - KNN and Gaussian Naive Bayes models with feature scaling
-- 5-fold cross-validation and KNN `k` tuning
+- 5-fold cross-validation and KNN `k` tuning (best k is used in the final model)
+- Model selection by cross-validation; test set used once for evaluation
 - Accuracy, classification report, and confusion matrix for both models
 - Early-warning output: at-risk students ranked by risk probability
 
 ## Dataset
-Expected file: `lms_records.csv`
-**Note:** The results in this repository were generated using synthetic data that simulates LMS records (attendance, assignments, logins, GPA), since real institutional LMS data was not available. The pipeline works unchanged with a real `lms_records.csv` having the columns above.
+**Student Performance Dataset** (math course, secondary school survey, 395 students) from Kaggle, by Dev Ansodariya: https://www.kaggle.com/datasets/devansodariya/student-performance-data
+
+File used: `student_data.csv`
 
 | Column | Description |
 |---|---|
-| attendance_pct | Attendance percentage |
-| assignments_submitted_pct | Percentage of assignments submitted |
-| avg_assignment_score | Average assignment score |
-| late_submissions | Number of late submissions |
-| lms_logins_per_week | Weekly LMS logins |
-| semester_gpa | Semester GPA (target) |
-
-If `lms_records.csv` is not found, the script generates synthetic demo data automatically.
+| absences | Number of school absences (attendance indicator) |
+| studytime | Weekly study time (1 to 4) |
+| failures | Number of past class failures |
+| G1 | First period grade (0 to 20) |
+| G2 | Second period grade (0 to 20) |
+| G3 | Final grade (0 to 20), used to create the target bands |
 
 ## Tech Stack
 Python, pandas, NumPy, scikit-learn, Matplotlib
@@ -37,7 +37,7 @@ Python, pandas, NumPy, scikit-learn, Matplotlib
 ## Project Structure
 ```
 ├── student_performance_knn_nb.py   # main script
-├── lms_records.csv                 # dataset (optional)
+├── student_data.csv                # dataset
 ├── mentor_alerts.csv               # at-risk student list
 ├── mentor_dashboard.png            # result charts
 └── README.md
@@ -56,47 +56,50 @@ python student_performance_knn_nb.py
 ```
 
 ## Methodology
-1. Load LMS records
-2. Clean and transform data (duplicates, missing values, outliers)
-3. Convert GPA into three performance bands
-4. Split data 80/20 (stratified)
-5. Train KNN and Naive Bayes with standard scaling
-6. Evaluate using cross-validation and test metrics
-7. Generate the mentor early-warning report and dashboard
+1. Load student data
+2. Convert final grade G3 into three performance bands (Low / Medium / High)
+3. Split data 80/20 (stratified)
+4. Clean data using training-set statistics only (missing values, outlier capping)
+5. Tune k for KNN using 5-fold cross-validation on the training set
+6. Train KNN (best k) and Naive Bayes with standard scaling
+7. Select the best model by cross-validation accuracy
+8. Evaluate once on the test set
+9. Generate the mentor early-warning report and charts
 
 ## Output
 - `mentor_alerts.csv`: students flagged as Low performers, ranked by risk %
-- `mentor_dashboard.png`: model accuracy comparison, KNN k-tuning curve, risk distribution
+- `mentor_dashboard.png`: model accuracy comparison, KNN k-tuning curve, predicted risk distribution
 
 ## Results
 | Model | CV Accuracy | Test Accuracy |
 |---|---|---|
-| KNN (k=7) | 0.778 | 0.770 |
-| Naive Bayes | 0.790 | 0.830 |
+| KNN (k=13) | 0.826 | 0.763 |
+| Naive Bayes | 0.832 | 0.750 |
 
-**Best model:** Naive Bayes (83% test accuracy)
-**Best k for KNN:** 17 (from cross-validation tuning)
-**At-risk students flagged:** 28 out of 100 test students
+**Best k for KNN:** 13 (from cross-validation tuning)
+**Best model (selected by CV):** Naive Bayes
+**At-risk students flagged:** 27 out of 76 test students
 
 ## Observations
-- Naive Bayes beat KNN on both CV accuracy (0.790 vs 0.778) and test accuracy (0.830 vs 0.770).
-- **High** and **Low** bands are predicted well (F1 about 0.83 to 0.89). The **Medium** band is hardest (F1 0.66 to 0.74) because it overlaps with both neighbouring groups.
-- Naive Bayes recalled High students almost perfectly (0.97).
+- Both models perform similarly. Naive Bayes had slightly higher CV accuracy (0.832 vs 0.826), while KNN had slightly higher test accuracy (0.763 vs 0.750). The test difference is about one student out of 76, so neither model is clearly better.
+- **High** and **Low** bands are predicted better (F1 about 0.77 to 0.86). The **Medium** band is hardest (F1 0.63 to 0.67) because it overlaps with both neighbouring groups.
+- Naive Bayes had the best performance on the High band (F1 0.86).
 
 ## Dashboard
 ![Mentor Dashboard](mentor_dashboard.png)
+
+## Limitations
+- The dataset is small (395 students), so results can vary with a different split.
+- G1 and G2 are earlier grades that are strongly related to the final grade G3, which makes prediction easier. A real early-warning system would need to work before these grades are available.
+- The dataset has `absences` but no direct assignment-submission data, so `absences` and earlier grades are used as proxies for attendance and assignment performance.
+- The dashboard is a static chart image, not an interactive application.
 
 ## Future Work
 - Live dashboard using Streamlit
 - Try more models (Random Forest, SVM)
 - Tune hyperparameters with GridSearchCV
-- Integrate directly with the institutional LMS
-- Validate with real LMS data from the institution
-
-## Limitations
-- Results are based on synthetic data, so they do not prove performance on real students.
-- Final KNN was trained with k=7; cross-validation tuning suggested k=17.
-- Outlier limits were computed before the train/test split; fitting them on training data only would be stricter.
+- Predict without G1 and G2 for earlier warnings
+- Validate with real institutional LMS data
 
 ## Author
 **Shaik Fathima Bee** (23ME1A5460)
